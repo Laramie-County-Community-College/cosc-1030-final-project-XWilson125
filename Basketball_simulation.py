@@ -1,11 +1,11 @@
 import random
 
 def RNG(value, variance):
-    return value + random.randrange(0-variance, variance)
+    return random.uniform(value-variance, value+variance)
 
 def percent_chance(value):
     num = random.randrange(0, 100)
-    if num > value:
+    if num < value:
         return True
     else:
         return False
@@ -17,7 +17,7 @@ class default_variables():          #Defines every last variable. Note: all vari
     two_point_percentage = 55
     freethrow_percentage = 80
     shot_rebound_chance = 25
-    freethrow_rebound_chance = 75
+    freethrow_rebound_chance = 25
     win_overtime_chance = 50
     three_point_percentage_deviation = 10
     two_point_percentage_deviation = 10
@@ -25,61 +25,81 @@ class default_variables():          #Defines every last variable. Note: all vari
     shot_rebound_chance_deviation = 10
     freethrow_rebound_chance_deviation = 7
     win_overtime_chance_deviation = 15
-    def _input_percentage():                                    #NOT COMPLETE!
-        percent_num = input(input)
-        try:
+
+    def _input_percentage(string):
+        percent_num = input(string)                             #Strips an input of '%' and ' '
+        percent_num = percent_num.replace('%', '').replace(' ', '')
+        try:                                                    #Tries to turn input into a float
             percent_num = float(percent_num)
         except:
             raise TypeError("Non-number inserted as a percentage")
-        if 0 <= percent_num <= 100:
-            raise ValueError("Number inserted is not from 0-100")
+        if 0.0 <= percent_num <= 100.0:                         #Returns float if between 0 and 100, raises ValueError if not
+            return percent_num
+        else:
+            raise ValueError("Number inserted is not from 0-100.")
         
+    def time_decrease(self, decrease_num):                      #Keeps track of time. Can't continue the game without time.
+        self.time -= decrease_num
+        if self.time <= 0:
+            raise TimeoutError('Game over!')
+
+    @staticmethod                                               #Learned this while working with ChatGPT the critic. I didn't copy-paste any of this code from ChatGPT.
     def change_variable():                                      #variable to edit certain stats(like if, for example, the opponent is bad at shooting free throws)
-        print(f'Current variables:\n'                           #Prints stats; necessary to look them over
+        #Starter stuff - Necessary to not break code. Sorry it's a bit messy.
+        print(f'Current variables:\n'                           #First print of stats; necessary to look them over
+              f'    1 - Three point shot chance: {default_variables.three_point_percentage}%\n'
+              f'    2 - Two point shot chance: {default_variables.two_point_percentage}%\n'
+              f'    3 - Opponent free throw chance: {default_variables.freethrow_percentage}%\n'
+              f'    4 - Offensive rebound chance: {default_variables.shot_rebound_chance}%\n'
+              f'    5 - Freethrow rebound chance: {default_variables.freethrow_rebound_chance}%\n')
+        varchange = input('Which variable would you like to change? Pick a number or e to exit. ')    #First input
+        while True:                                             #Repeats program until user stops changing variables.
+            if varchange == 'e':                                #Validates input
+                break
+            try:
+                varchange = int(varchange)
+                if not (1 <= varchange <= 5):
+                    varchange = input('That is not a valid number. Pick a number from 1 to 5.')
+            except:
+                try:
+                    quit_num += 1
+                except:
+                    quit_num = 1
+                if quit_num == 3:
+                    print('That is not a valid input. Assuming that you want to exit the function.')
+                    varchange = 'e'
+                    continue
+                varchange = input('That is not a valid input. Pick a number. ')
+                continue
+            print('Please input any number between 0% and 100%.')
+            if varchange == 1:
+                default_variables.three_point_percentage = default_variables._input_percentage('Please input a new three point shot chance: ')
+            elif varchange == 2:
+                default_variables.two_point_percentage = default_variables._input_percentage('Please input a new two point shot chance: ')
+            elif varchange == 3:
+                default_variables.freethrow_percentage = default_variables._input_percentage('Please input a new opponent free throw chance: ')
+            elif varchange == 4:
+                default_variables.shot_rebound_chance = default_variables._input_percentage('Please input a new offensive rebound chance: ')
+            elif varchange == 5:
+                default_variables.freethrow_rebound_chance = default_variables._input_percentage('Please input a new defensive rebound chance: ')
+
+            print(f'Current variables:\n'                       #Prints stats; necessary to look them over
               f'    1 - Three point shot chance: {default_variables.three_point_percentage}%\n'
               f'    2 - Two point shot chance: {default_variables.two_point_percentage}%\n'
               f'    3 - Opponent free throw chance: {default_variables.freethrow_percentage}%\n'
               f'    4 - Offensive rebound chance: {default_variables.shot_rebound_chance}%\n'
               f'    5 - Defensive rebound chance: {default_variables.freethrow_rebound_chance}%\n')
-    #Gathers and validates input
-        varchange = input('Which variable would you like to change? Pick a number or e to exit. ')
-        valid_input = False
-        quit_num = 0
-        while valid_input == False:
-            try:
-                varchange = int(varchange)
-                if 1 <= varchange <= 5:
-                    valid_input = True
-                else:
-                    varchange = input('That is not a valid number. Pick a number from 1 to 5.')
-            except:
-                if quit_num == 3 or varchange == 'e':
-                    print('Assuming that you want to exit the function.')
-                    break
-                print('That is not a valid input. Pick a number.')
-                quit_num += 1
-
-        if varchange == 1:
-            default_variables.three_point_percentage = default_variables._input_percentage()
-        elif varchange == 2:
-            pass
-        elif varchange == 3:
-            pass
-        elif varchange == 4:
-            pass
-        elif varchange == 5:
-            pass
+            varchange = input('Would you like to pick another variable? If so, pick a number, or input e to exit. ')
 
     def determine_variables(self):
-        self.three_point_percentage = RNG(default_variables.three_point_percentage, default_variables.three_point_percentage_deviation)
-        self.two_point_percentage = RNG(default_variables.two_point_percentage, default_variables.two_point_percentage_deviation)
-        self.freethrow_percentage = RNG(default_variables.freethrow_percentage, default_variables.freethrow_percentage_deviation)
-        self.shot_rebound_chance = RNG(default_variables.shot_rebound_chance, default_variables.shot_rebound_chance_deviation)
-        self.freethrow_rebound_chance = RNG(default_variables.freethrow_rebound_chance, default_variables.freethrow_rebound_chance_deviation)
-        self.win_overtime_chance = RNG(default_variables.win_overtime_chance, default_variables.win_overtime_chance_deviation)
+        self.three_point_percentage = RNG(self.three_point_percentage, self.three_point_percentage_deviation)
+        self.two_point_percentage = RNG(self.two_point_percentage, self.two_point_percentage_deviation)
+        self.freethrow_percentage = RNG(self.freethrow_percentage, self.freethrow_percentage_deviation)
+        self.shot_rebound_chance = RNG(self.shot_rebound_chance, self.shot_rebound_chance_deviation)
+        self.freethrow_rebound_chance = RNG(self.freethrow_rebound_chance, self.freethrow_rebound_chance_deviation)
+        self.win_overtime_chance = RNG(self.win_overtime_chance, self.win_overtime_chance_deviation)
 
 def three_point_shot(game):
-    print('tpstest')                #REMOVE: USED FOR TESTING!
     if percent_chance(game.three_point_percentage):
         return percent_chance(game.win_overtime_chance)
     else:
@@ -90,32 +110,47 @@ If the shot misses, the game is lost.
 If the shot goes in, overtime is forced, where the outcome is a 50/50 chance.'''
 
 def two_point_foul(game):
-    print('tpftest')                #REMOVE: USED FOR TESTING!
-    not_certain_turnover = True
-    if percent_chance(game.two_point_percentage):
-        game.score_needed_to_make -= 2
-        not_certain_turnover = False
-    while not_certain_turnover and percent_chance(game.shot_rebound_chance):
-        if percent_chance(game.two_point_percentage):
-            game.score_needed_to_make -= 2
-            not_certain_turnover = False
-    
-    while game.time > 0:
-        if percent_chance(game.freethrow_percentage):
-            game.score_needed_to_make += 1
-            certain_rebound = True
+    try:
+        while game.time > 0:
+            game.time_decrease(RNG(8, 3))                   #Accounts for getting into a scoring position
+                #Determines if the initial 2-point shot goes in, and accounts for rebounds.
+            not_certain_turnover = True
+            if percent_chance(game.two_point_percentage):
+                game.score_needed_to_make -= 2
+                not_certain_turnover = False
+            while not_certain_turnover and percent_chance(game.shot_rebound_chance):
+                game.time_decrease(RNG(3, 1))
+                if percent_chance(game.two_point_percentage):
+                    game.score_needed_to_make -= 2
+                    not_certain_turnover = False
+            #Determines if free throw makes it or not
+            if percent_chance(game.freethrow_percentage):
+                game.score_needed_to_make += 1
+                certain_rebound = True
+            else:
+                certain_rebound = False
+            if certain_rebound:
+                game.time_decrease(RNG(6, 2.5))
+            elif percent_chance(game.freethrow_rebound_chance):
+                game.time_decrease(RNG(4, 1))
+            else:
+                game.time_decrease(RNG(8, 1))
+    except TimeoutError:                                    #I know this isn't the way it should be used, but 1. I don't want to make my own error, and 2. It's funny.
+        if game.score_needed_to_make > 0:
+            return False
+        elif game.score_needed_to_make == 0:
+            return percent_chance(game.win_overtime_chance)
         else:
-            certain_rebound = False
-        if percent_chance(game.freethrow_rebound_chance) or certain_rebound:
-            pass
+            return True
 '''    Two-Point + Foul Strategy
 
 Attempt a higher-percentage two-point shot.
 If the shot goes in, foul the opponent to regain possession.
 Track free throw outcomes and keep playing until time runs out.'''
 
+
 sim_run_count = int(input('Please insert number of times to run simulation: '))
-change_sim = input('Would you like to change the default parameters? y/n')
+change_sim = input('Would you like to change the default parameters? y/n ')
 if change_sim == 'y' or change_sim == 'Y':
     default_variables.change_variable()
 elif change_sim == 'n' or change_sim == 'N':
@@ -131,30 +166,5 @@ for unused in range(sim_run_count):
         three_point_win_count += 1
     if two_point_foul(game) == True: #will use variables to calculate 2-point-and-foul plan, then add outcome to list
         two_point_win_count += 1
-print(f'Three point win percentage: {three_point_win_count/sim_run_count}')
-print(f'Two point and foul win percentage: {two_point_win_count/sim_run_count}')
-
-
-
-
-'''
-The primary idea behind a trial is to model the strategy - either a two point or three point strategy as outlined below.
-
-This is done with randomness.  The two and three point shots, along with the free throw attempts, will all be determined by whether a random number falls above or below the chance you assign to it up front.  That success or failure helps determine the combined event probability that the strategy succeeds or fails on a given trial.
-
-Three-Point Strategy
-
-Take a single 3-point shot when time is running out.
-If the shot misses, the game is lost.
-If the shot goes in, overtime is forced, where the outcome is a 50/50 chance.
-
-Two-Point + Foul Strategy
-
-Attempt a higher-percentage two-point shot.
-If the shot goes in, foul the opponent to regain possession.
-Track free throw outcomes and keep playing until time runs out.
-
-Monte Carlo Simulation Process
-Run thousands of trials for each strategy.
-Record win/loss outcomes for both strategies.
-Compare success rates to see which approach has a higher probability of winning.'''
+print(f'Three point win percentage: {three_point_win_count/sim_run_count*100:.2f}%')
+print(f'Two point and foul win percentage: {two_point_win_count/sim_run_count*100:.2f}%')
