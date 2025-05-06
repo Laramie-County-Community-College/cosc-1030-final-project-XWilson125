@@ -99,16 +99,24 @@ class default_variables():          #Defines every last variable. Note: all vari
         self.freethrow_rebound_chance = RNG(self.freethrow_rebound_chance, self.freethrow_rebound_chance_deviation)
         self.win_overtime_chance = RNG(self.win_overtime_chance, self.win_overtime_chance_deviation)
 
+
+'''     Three-point Shot Strategy
+Take a single 3-point shot when time is running out.
+If the shot misses, the game is lost.
+If the shot goes in, overtime is forced, where the outcome is a 50/50 chance.'''
+
 def three_point_shot(game):
     if percent_chance(game.three_point_percentage):
         return percent_chance(game.win_overtime_chance)
     else:
         return False
-'''
-Take a single 3-point shot when time is running out.
-If the shot misses, the game is lost.
-If the shot goes in, overtime is forced, where the outcome is a 50/50 chance.'''
+    
 
+'''    Two-Point + Foul Strategy
+
+Attempt a higher-percentage two-point shot.
+If the shot goes in, foul the opponent to regain possession.
+Track free throw outcomes and keep playing until time runs out.'''
 def two_point_foul(game):
     try:
         while game.time > 0:
@@ -142,23 +150,22 @@ def two_point_foul(game):
             return percent_chance(game.win_overtime_chance)
         else:
             return True
-'''    Two-Point + Foul Strategy
-
-Attempt a higher-percentage two-point shot.
-If the shot goes in, foul the opponent to regain possession.
-Track free throw outcomes and keep playing until time runs out.'''
-
-
-sim_run_count = int(input('Please insert number of times to run simulation: '))
+sim_run_count=None
+while sim_run_count==None:
+    try:
+        sim_run_count = int(input('Please insert number of times to run simulation: '))
+    except:
+        print('That is not a valid input.')
 change_sim = input('Would you like to change the default parameters? y/n ')
 if change_sim == 'y' or change_sim == 'Y':
     default_variables.change_variable()
 elif change_sim == 'n' or change_sim == 'N':
     print('Keeping default variables.')
 else:
-    print("Unknown input. Assuming 'n' as your answer. Keeping default variables")
+    print("Unknown input. Assuming 'n' as your answer. Keeping default variables.")
 three_point_win_count = 0
 two_point_win_count = 0
+print('Running simulation: ')
 for unused in range(sim_run_count):
     game = default_variables()
     game.determine_variables()
