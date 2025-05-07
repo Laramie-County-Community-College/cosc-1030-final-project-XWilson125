@@ -1,4 +1,5 @@
 import random
+import sys          #For the sole reason of erasing printed lines
 
 def RNG(value, variance):
     return random.uniform(value-variance, value+variance)
@@ -150,28 +151,49 @@ def two_point_foul(game):
             return percent_chance(game.win_overtime_chance)
         else:
             return True
+        
+#Main code
+
+#Pulls how many times to run the simulation from input and validates input
 sim_run_count=None
 while sim_run_count==None:
     try:
         sim_run_count = int(input('Please insert number of times to run simulation: '))
+    except KeyboardInterrupt:                   #Necessary to make sure that you don't get stuck in an unquittable infinite loop.
+        raise KeyboardInterrupt
     except:
         print('That is not a valid input.')
+
+#Allows the user to change an input
 change_sim = input('Would you like to change the default parameters? y/n ')
-if change_sim == 'y' or change_sim == 'Y':
-    default_variables.change_variable()
-elif change_sim == 'n' or change_sim == 'N':
-    print('Keeping default variables.')
-else:
-    print("Unknown input. Assuming 'n' as your answer. Keeping default variables.")
+exit = False                                                                #Controls while loop to validate input
+while exit == False:
+    if change_sim == 'y' or change_sim == 'Y':
+        default_variables.change_variable()
+        exit = True
+    elif change_sim == 'n' or change_sim == 'N':
+        print('Keeping default variables.')
+        exit = True
+    else:
+        print("That is not a valid input.")
+        change_sim = input('Would you like to change the default parameters? y/n ')
+
+#Sets up and runs simulation
 three_point_win_count = 0
 two_point_win_count = 0
 print('Running simulation: ')
-for unused in range(sim_run_count):
+for current_iteration in range(sim_run_count):
     game = default_variables()
     game.determine_variables()
-    if three_point_shot(game) == True: #will use variables to calculate 3-point plan, then add outcome to list
+    if three_point_shot(game) == True:                              #will use variables to calculate 3-point plan, and count the number of wins
         three_point_win_count += 1
-    if two_point_foul(game) == True: #will use variables to calculate 2-point-and-foul plan, then add outcome to list
+    if two_point_foul(game) == True:                                #will use variables to calculate 2-point-and-foul plan, and count the number of wins
         two_point_win_count += 1
+    if sim_run_count>200000 and current_iteration//20000 == current_iteration/20000 and current_iteration/20000 != 0:   #Tells the user how done the simulation is if the simulation will use more.
+        print(f'Currently {current_iteration/sim_run_count*100:.2f}% complete with simulation.')
+        sys.stdout.write("\033[F")                                      #Learned from the internet. Effectively makes it so that the previous command doesn't spam messages.
+
+#Outputs stats
+print('Simulation complete.                         ')              #Spaces necessary to clear previous line
 print(f'Three point win percentage: {three_point_win_count/sim_run_count*100:.2f}%')
 print(f'Two point and foul win percentage: {two_point_win_count/sim_run_count*100:.2f}%')
