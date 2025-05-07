@@ -14,6 +14,7 @@ def percent_chance(value):
 class default_variables():          #Defines every last variable. Note: all variables are taken from NBA stats and are rough guesstimates for the variation. Classed purely for storage.
     time = 30
     score_needed_to_make = 3
+    points_scored = 0
     three_point_percentage = 30
     two_point_percentage = 55
     freethrow_percentage = 80
@@ -108,7 +109,12 @@ If the shot goes in, overtime is forced, where the outcome is a 50/50 chance.'''
 
 def three_point_shot(game):
     if percent_chance(game.three_point_percentage):
-        return percent_chance(game.win_overtime_chance)
+        game.points_scored += 3
+        if percent_chance(game.win_overtime_chance):
+            game.points_scored += 2
+            return True
+        else:
+            return False
     else:
         return False
     
@@ -126,11 +132,13 @@ def two_point_foul(game):
             not_certain_turnover = True
             if percent_chance(game.two_point_percentage):
                 game.score_needed_to_make -= 2
+                game.points_scored += 2
                 not_certain_turnover = False
             while not_certain_turnover and percent_chance(game.shot_rebound_chance):
                 game.time_decrease(RNG(3, 1))
                 if percent_chance(game.two_point_percentage):
                     game.score_needed_to_make -= 2
+                    game.points_scored += 2
                     not_certain_turnover = False
             #Determines if free throw makes it or not
             if percent_chance(game.freethrow_percentage):
@@ -180,15 +188,20 @@ while exit == False:
 
 #Sets up and runs simulation
 three_point_win_count = 0
+three_point_score_count = 0
 two_point_win_count = 0
+two_point_score_count = 0
 print('Running simulation: ')
 for current_iteration in range(sim_run_count):
     game = default_variables()
     game.determine_variables()
     if three_point_shot(game) == True:                              #will use variables to calculate 3-point plan, and count the number of wins
         three_point_win_count += 1
+        three_point_score_count += game.points_scored
+        game.points_scored = 0                                      #A precaution. No need to take the scores from three_point_shot to two_point_foul
     if two_point_foul(game) == True:                                #will use variables to calculate 2-point-and-foul plan, and count the number of wins
         two_point_win_count += 1
+        two_point_score_count += game.points_scored
     if sim_run_count>200000 and current_iteration//20000 == current_iteration/20000 and current_iteration/20000 != 0:   #Tells the user how done the simulation is if the simulation will use more.
         print(f'Currently {current_iteration/sim_run_count*100:.2f}% complete with simulation.')
         sys.stdout.write("\033[F")                                      #Learned from the internet. Effectively makes it so that the previous command doesn't spam messages.
@@ -196,4 +209,6 @@ for current_iteration in range(sim_run_count):
 #Outputs stats
 print('Simulation complete.                         ')              #Spaces necessary to clear previous line
 print(f'Three point win percentage: {three_point_win_count/sim_run_count*100:.2f}%')
+print(f'Three point average points scored: {three_point_score_count/sim_run_count:.2f} points')
 print(f'Two point and foul win percentage: {two_point_win_count/sim_run_count*100:.2f}%')
+print(f'Two point average points scored: {two_point_score_count/sim_run_count:.2f} points')
